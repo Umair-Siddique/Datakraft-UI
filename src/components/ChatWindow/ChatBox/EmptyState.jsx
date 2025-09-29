@@ -83,7 +83,7 @@ const ChatAreaEmptyState = () => {
 
           {/* Text */}
           <p className="text-xl font-semibold text-black animate-slide-up">
-            Please select a chat to start conversing with <span className="font-bold hover:text-gray-700 transition-colors duration-300">Bureauo Fmemoranda</span>
+            Please select a chat to start conversing with <span className="font-bold hover:text-gray-700 transition-colors duration-300">Cybersecurity Agent</span>
           </p>
         </div>
       </div>

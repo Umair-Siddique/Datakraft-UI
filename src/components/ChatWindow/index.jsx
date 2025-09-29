@@ -112,14 +112,10 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
         throw new Error("Access token not found. Please log in again.");
       }
 
-      const history = convertMessagesToHistory(messages);
-
+      // Updated request payload to match your exact API specification
       const requestPayload = {
-        access_token,
-        conversation_id: activeId || uuidv4(),
         query: query.trim(),
-        history: history,
-        model_id: selectedModel,
+        conversation_id: activeId || uuidv4(),
       };
 
       const response = await fetch(`${API_URL}/retriever/query`, {
@@ -168,64 +164,71 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
 
-        // Split into SSE messages by double newlines
-        const parts = buffer.split("\n\n");
-        buffer = parts.pop() || ""; // Keep the last incomplete part in buffer
+        // Split by newlines to get individual lines
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ""; // Keep the last incomplete line in buffer
 
-        for (const message of parts) {
-          const lines = message.split("\n");
-          let event = "message";
-          let data = "";
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (!trimmedLine) continue;
 
-          // Parse SSE format
-          for (const line of lines) {
-            if (line.startsWith("event:")) {
-              event = line.slice(6).trim();
-            } else if (line.startsWith("data:")) {
-              data += (data ? "\n" : "") + line.slice(5).trim();
+          // Handle SSE format with "data: " prefix
+          if (trimmedLine.startsWith('data: ')) {
+            try {
+              const jsonData = JSON.parse(trimmedLine.slice(6)); // Remove "data: " prefix
+              
+              // Handle different response types
+              if (jsonData.type === "complete") {
+                console.log("Conversation complete:", jsonData.conversation_id);
+                setCurrentStatus({ type: "complete", conversation_id: jsonData.conversation_id });
+                
+                // Mark streaming as complete
+                setMessages(prev => prev.map(msg => 
+                  msg.id === streamingId 
+                    ? { ...msg, isStreaming: false }
+                    : msg
+                ));
+              } else if (jsonData.type === "status") {
+                // Show status message
+                setCurrentStatus(jsonData);
+                setMessages(prev => prev.map(msg => 
+                  msg.id === streamingId 
+                    ? { ...msg, text: `Processing: ${jsonData.message || 'Analyzing your request...'}` }
+                    : msg
+                ));
+              } else if (jsonData.type === "final_response") {
+                // This is the complete final response - start with this content
+                accumulatedAnswer = jsonData.content;
+                setStreamingAiResponseText(accumulatedAnswer);
+                
+                // Update the streaming message with the final response
+                setMessages(prev => prev.map(msg => 
+                  msg.id === streamingId 
+                    ? { ...msg, text: accumulatedAnswer }
+                    : msg
+                ));
+              } else if (jsonData.type === "response_chunk") {
+                // This is a streaming chunk - append to existing content
+                accumulatedAnswer += jsonData.content;
+                setStreamingAiResponseText(accumulatedAnswer);
+                
+                // Update the streaming message with accumulated text
+                setMessages(prev => prev.map(msg => 
+                  msg.id === streamingId 
+                    ? { ...msg, text: accumulatedAnswer }
+                    : msg
+                ));
+              } else if (jsonData.type === "error") {
+                // Handle error
+                setMessages(prev => prev.map(msg => 
+                  msg.id === streamingId 
+                    ? { ...msg, text: `Error: ${jsonData.message}`, isError: true, isStreaming: false }
+                    : msg
+                ));
+              }
+            } catch (parseError) {
+              console.error("Error parsing SSE data:", parseError, "Line:", trimmedLine);
             }
-          }
-
-          if (!data) continue;
-
-          try {
-            // Handle different event types
-            if (event === "status") {
-              const statusData = JSON.parse(data);
-              setCurrentStatus(statusData);
-              console.log("Status:", statusData);
-              
-              // Update the streaming message with status
-              setMessages(prev => prev.map(msg => 
-                msg.id === streamingId 
-                  ? { ...msg, text: statusData }
-                  : msg
-              ));
-            } else if (event === "token") {
-              const tokenData = JSON.parse(data);
-              accumulatedAnswer += tokenData;
-              setStreamingAiResponseText(accumulatedAnswer);
-              
-              // Update the streaming message with accumulated text
-              setMessages(prev => prev.map(msg => 
-                msg.id === streamingId 
-                  ? { ...msg, text: accumulatedAnswer }
-                  : msg
-              ));
-            } else if (event === "done") {
-              const doneData = JSON.parse(data);
-              console.log("Stream complete:", doneData);
-              setCurrentStatus(null);
-              
-              // Finalize the streaming message
-              setMessages(prev => prev.map(msg => 
-                msg.id === streamingId 
-                  ? { ...msg, text: accumulatedAnswer, isStreaming: false }
-                  : msg
-              ));
-            }
-          } catch (parseError) {
-            console.error("Error parsing SSE data:", parseError, "Data:", data);
           }
         }
       }

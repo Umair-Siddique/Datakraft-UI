@@ -26,8 +26,8 @@ const ChatHeader = ({
 
   return (
     <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-transparent">
-      {/* AI Model Selector */}
-      <div className="relative" ref={dropdownRef}>
+{/* AI Model Selector - HIDDEN */}
+      {/* <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setShowModelSelector(!showModelSelector)}
           className="flex items-center space-x-2 px-3 py-2 rounded-md transition-colors duration-200 text-sm"
@@ -149,8 +149,7 @@ const ChatHeader = ({
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </div> 
   );
 };
 

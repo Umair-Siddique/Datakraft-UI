@@ -207,7 +207,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/prompt/get_user_system_prompt`, {
+      const response = await fetch(`${API_URL}/sys_prompt/get_user_system_prompt`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${access_token}`, 
@@ -255,7 +255,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
     }, 30000); // 30 second timeout
 
     try {
-      const requestUrl = `${API_URL}/prompt/update_user_system_prompt`;
+      const requestUrl = `${API_URL}/sys_prompt/update_user_system_prompt`;
       console.log("📡 Request URL:", requestUrl);
       
       const requestBody = {
@@ -346,7 +346,8 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
 
       {/* Upload Document and System Prompt Buttons */}
       <div className="px-4 py-2 space-y-2">
-        <button
+        {/* Upload Document Button - Hidden */}
+        {/* <button
           onClick={handleUploadClick}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
           disabled={uploadLoading}
@@ -355,7 +356,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
           {uploadLoading ? "Uploading..." : "Upload Document"}
-        </button>
+        </button> */}
         
         <button
           onClick={handleSystemPromptClick}
