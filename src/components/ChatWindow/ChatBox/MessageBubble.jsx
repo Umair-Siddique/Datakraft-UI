@@ -55,14 +55,35 @@ const MessageBubble = ({ msg, isUser, isFirstAIResponse }) => {
           ${getMessageStyles(msg.from, msg.isError)}
           ${isUser ? "rounded-br-md" : "rounded-bl-md"}`}
       >
-        <p
+        <div
           className={`whitespace-pre-wrap ${
             isFirstAIResponse ? "font-medium" : ""
           }`}
         >
           {/* MODIFY THIS LINE: Add the remarkPlugins prop */}
           <Markdown remarkPlugins={[remarkGfm]}>{msg.text}</Markdown>
-        </p>
+          
+          {/* Streaming cursor indicator */}
+          {msg.isStreaming && !isUser && (
+            <span className="inline-block w-2 h-4 ml-1 bg-gray-900 animate-blink" />
+          )}
+        </div>
+        
+        {/* Add blink animation for cursor */}
+        <style>{`
+          @keyframes blink {
+            0%, 49% {
+              opacity: 1;
+            }
+            50%, 100% {
+              opacity: 0;
+            }
+          }
+          
+          .animate-blink {
+            animation: blink 1s infinite;
+          }
+        `}</style>
 
         {/* Copy Button */}
         {!msg.isError && (

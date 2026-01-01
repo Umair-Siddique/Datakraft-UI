@@ -6,6 +6,7 @@ import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
 import ChatAreaEmptyState from "../components/ChatWindow/ChatBox/EmptyState";
 import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import { API_URL } from "../constants";
 
 const ChatPage = () => {
   const [recentChats, setRecentChats] = useState([]);
@@ -192,25 +193,43 @@ const ChatPage = () => {
   // Handle chat deletion
   const handleDeleteChat = useCallback(
     async (chatId) => {
+      console.log("🔥 handleDeleteChat called with chatId:", chatId);
+      console.log("🔥 chatId type:", typeof chatId);
+      
       try {
-        // Get access token from localStorage
-        const accessToken = localStorage.getItem('access_token');
+        // Get access token from localStorage (try both storage methods)
+        const userStr = localStorage.getItem("user");
+        console.log("👤 User string from localStorage:", userStr ? "exists" : "null");
+        
+        const user = JSON.parse(userStr || "{}");
+        console.log("👤 Parsed user object:", user);
+        
+        const accessToken = user?.access_token || localStorage.getItem('access_token');
+        console.log("🔑 Access token:", accessToken);
+        console.log("🔑 Access token length:", accessToken?.length);
         
         if (!accessToken) {
+          console.error("❌ No access token found!");
           toast.error("Authentication required");
           return;
         }
 
-        // Make API call to delete chat
-        const response = await fetch(`${API_URL}/chat/delete/${chatId}`, {
+        // Make API call to delete chat (correct endpoint: /chat/delete_chat/{id})
+        const apiUrl = `${API_URL}/chat/delete_chat/${chatId}`;
+        console.log("📡 DELETE request to:", apiUrl);
+        console.log("📡 Authorization header:", `Bearer ${accessToken}`);
+        
+        const response = await fetch(apiUrl, {
           method: 'DELETE',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': accessToken,
+            'Authorization': `Bearer ${accessToken}`,
           },
         });
+        
+        console.log("📥 Response status:", response.status);
 
         if (response.ok) {
+          console.log("✅ Chat deleted successfully");
           // Remove chat from local state
           setRecentChats((prevChats) => {
             const chatToDelete = prevChats.find((chat) => chat.id === chatId);
@@ -224,7 +243,7 @@ const ChatPage = () => {
             }
 
             if (chatToDelete) {
-              toast.success(`Chat "${chatToDelete.title}" deleted.`, {
+              toast.success(`"${chatToDelete.title}" deleted successfully`, {
                 duration: 2000,
               });
             }
@@ -232,7 +251,9 @@ const ChatPage = () => {
             return updatedChats;
           });
         } else {
+          console.error("❌ Delete failed with status:", response.status);
           const errorData = await response.json().catch(() => ({}));
+          console.error("❌ Error data:", errorData);
           toast.error(errorData.message || "Failed to delete chat");
         }
       } catch (error) {

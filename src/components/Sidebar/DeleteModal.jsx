@@ -1,6 +1,6 @@
 import React from "react";
 
-const DeleteModal = ({ show, onClose, onConfirm, chatTitle }) => {
+const DeleteModal = ({ show, onClose, onConfirm, chatTitle, isLoading = false }) => {
   if (!show) {
     return null;
   }
@@ -17,15 +17,17 @@ const DeleteModal = ({ show, onClose, onConfirm, chatTitle }) => {
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-md !text-gray-700 !hover:bg-gray-200 transition-colors"
+            disabled={isLoading}
+            className="px-4 py-2 rounded-md !text-gray-700 !hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 !text-gray-200 rounded-md !hover:bg-red-700 transition-colors"
+            disabled={isLoading}
+            className="px-4 py-2 bg-red-600 !text-gray-200 rounded-md !hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Delete
+            {isLoading ? "Deleting..." : "Delete"}
           </button>
         </div>
       </div>

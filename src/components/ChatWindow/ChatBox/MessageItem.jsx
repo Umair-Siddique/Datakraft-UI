@@ -5,7 +5,8 @@ import MessageBubble from "./MessageBubble";
 const MessageItem = memo(({ messages, msg, index }) => {
   // Handle both live message format and persisted message format
   const messageId = msg.id || msg.message_id;
-  const sender = msg.from || msg.sender;
+  // Map role: "assistant" -> "ai", "user" -> "user"
+  const sender = msg.from || (msg.role === "assistant" ? "ai" : msg.role) || msg.sender;
   const content = msg.text || msg.content;
   const createdAt = msg.timestamp || msg.created_at;
 
@@ -18,8 +19,9 @@ const MessageItem = memo(({ messages, msg, index }) => {
       from: sender,
       text: content,
       timestamp: createdAt,
+      isStreaming: msg.isStreaming,
     }),
-    [messageId, sender, content, createdAt]
+    [messageId, sender, content, createdAt, msg.isStreaming]
   );
 
   // Determine if this is the first AI response in the conversation

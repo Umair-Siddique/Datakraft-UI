@@ -29,6 +29,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
   const [showSystemPromptModal, setShowSystemPromptModal] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [systemPromptLoading, setSystemPromptLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Filtered chats
   const filteredChats = useMemo(() => {
@@ -71,13 +72,45 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
   };
 
   const handleConfirmDeleteChat = async () => {
-    if (!chatToDeleteId) return;
+    if (!chatToDeleteId) {
+      console.log("❌ No chat ID to delete");
+      return;
+    }
 
-    await onDeleteChat(chatToDeleteId);
-    await fetchChats();
+    const chatToDelete = recentChats.find((c) => c.id === chatToDeleteId);
+    const chatName = chatToDelete ? chatToDelete.title : "chat";
 
-    setShowConfirmDeleteChat(false);
-    setChatToDeleteId(null);
+    setDeleteLoading(true);
+    const loadingToastId = toast.loading(`Deleting "${chatName}"...`);
+
+    try {
+      console.log("🗑️ Deleting chat with ID:", chatToDeleteId);
+      console.log("🗑️ onDeleteChat function exists:", typeof onDeleteChat);
+      console.log("🗑️ onDeleteChat:", onDeleteChat);
+      
+      if (typeof onDeleteChat === 'function') {
+        console.log("✅ Calling onDeleteChat...");
+        await onDeleteChat(chatToDeleteId);
+        console.log("✅ onDeleteChat completed");
+      } else {
+        console.error("❌ onDeleteChat is not a function!");
+        toast.error("Failed to delete chat", { id: loadingToastId });
+      }
+      
+      console.log("🔄 Fetching chats...");
+      await fetchChats();
+
+      // Success message is handled in ChatPage's handleDeleteChat
+      // Just dismiss the loading toast here
+      toast.dismiss(loadingToastId);
+    } catch (error) {
+      console.error("❌ Error in onDeleteChat:", error);
+      toast.error("Failed to delete chat", { id: loadingToastId });
+    } finally {
+      setDeleteLoading(false);
+      setShowConfirmDeleteChat(false);
+      setChatToDeleteId(null);
+    }
   };
 
   const getChatNameToDelete = () => {
@@ -207,7 +240,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/sys_prompt/get_user_system_prompt`, {
+      const response = await fetch(`${API_URL}/prompt/get_user_system_prompt`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${access_token}`, 
@@ -255,7 +288,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
     }, 30000); // 30 second timeout
 
     try {
-      const requestUrl = `${API_URL}/sys_prompt/update_user_system_prompt`;
+      const requestUrl = `${API_URL}/prompt/update_user_system_prompt`;
       console.log("📡 Request URL:", requestUrl);
       
       const requestBody = {
@@ -410,8 +443,8 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
         show={showConfirmDeleteChat}
         onClose={() => setShowConfirmDeleteChat(false)}
         onConfirm={handleConfirmDeleteChat}
-        title="Delete Chat"
-        message={`Are you sure you want to delete "${getChatNameToDelete()}"? This action cannot be undone.`}
+        chatTitle={getChatNameToDelete()}
+        isLoading={deleteLoading}
       />
       
       <style>{`

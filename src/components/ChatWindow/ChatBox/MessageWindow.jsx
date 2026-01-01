@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import MessageItem from "./MessageItem";
+import StatusIndicator from "./StatusIndicator";
 
-const MessageWindow = ({ messages, isLoadingMessages }) => {
+const MessageWindow = ({ messages, isLoadingMessages, currentStatus }) => {
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -46,6 +47,9 @@ const MessageWindow = ({ messages, isLoadingMessages }) => {
             index={index}
           />
         ))}
+        
+        {/* Status Indicator - shown when processing */}
+        {currentStatus && <StatusIndicator status={currentStatus} />}
         
         {/* Empty div to scroll to */}
         <div ref={messagesEndRef} />

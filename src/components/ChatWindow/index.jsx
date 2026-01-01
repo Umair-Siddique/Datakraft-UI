@@ -6,6 +6,7 @@ import { API_URL } from "../../constants";
 import MessageWindow from "./ChatBox/MessageWindow";
 import InputArea from "./ChatBox/InputArea";
 import ChatHeader from "./ChatBox/ChatHeader";
+import StatusIndicator from "./ChatBox/StatusIndicator";
 
 // Available AI models
 const AI_MODELS = [
@@ -68,13 +69,15 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
       const data = await response.json();
 
       // Transform the messages to match the expected format
+      // Backend returns messages with "role" field ("user" or "assistant")
+      // Sort by timestamp to ensure correct chronological order (oldest first)
       const transformedMessages =
         data.messages?.map((msg) => ({
           id: msg.id,
-          from: msg.sender === "user" ? "user" : "ai",
+          from: msg.role === "user" ? "user" : "ai", // Map "assistant" to "ai"
           text: msg.content,
           timestamp: msg.created_at,
-        })) || [];
+        })).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)) || []; // Sort oldest to newest
 
       setMessages(transformedMessages);
     } catch (error) {
@@ -142,22 +145,15 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
       // Create streaming message ID
       const streamingId = uuidv4();
       setStreamingMessageId(streamingId);
-
-      // Add initial streaming message
-      const initialStreamingMessage = {
-        from: "ai",
-        text: "",
-        id: streamingId,
-        timestamp: new Date().toISOString(),
-        isStreaming: true,
-      };
       
-      setMessages(prev => [...prev, initialStreamingMessage]);
+      // Don't add message yet - wait for content to start
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
           console.log("Stream finished.");
+          // Clear status when done
+          setCurrentStatus(null);
           break;
         }
 
@@ -177,49 +173,54 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
             try {
               const jsonData = JSON.parse(trimmedLine.slice(6)); // Remove "data: " prefix
               
-              // Handle different response types
-              if (jsonData.type === "complete") {
-                console.log("Conversation complete:", jsonData.conversation_id);
-                setCurrentStatus({ type: "complete", conversation_id: jsonData.conversation_id });
+              // Handle different response types based on the API specification
+              if (jsonData.type === "status") {
+                // Show status message with animated indicator
+                console.log("Status:", jsonData.message);
+                setCurrentStatus(jsonData.message);
+              } else if (jsonData.type === "content") {
+                // Clear status when content starts streaming
+                if (currentStatus) {
+                  setCurrentStatus(null);
+                }
                 
+                // Append content chunk to accumulated answer
+                accumulatedAnswer += jsonData.message;
+                setStreamingAiResponseText(accumulatedAnswer);
+                
+                // Create or update the streaming message
+                setMessages(prev => {
+                  const existingMessage = prev.find(msg => msg.id === streamingId);
+                  if (existingMessage) {
+                    // Update existing message
+                    return prev.map(msg => 
+                      msg.id === streamingId 
+                        ? { ...msg, text: accumulatedAnswer, isStreaming: true }
+                        : msg
+                    );
+                  } else {
+                    // Create new message
+                    return [...prev, {
+                      from: "ai",
+                      text: accumulatedAnswer,
+                      id: streamingId,
+                      timestamp: new Date().toISOString(),
+                      isStreaming: true,
+                    }];
+                  }
+                });
+              } else if (jsonData.type === "done") {
                 // Mark streaming as complete
+                console.log("Stream complete");
+                setCurrentStatus(null);
                 setMessages(prev => prev.map(msg => 
                   msg.id === streamingId 
                     ? { ...msg, isStreaming: false }
                     : msg
                 ));
-              } else if (jsonData.type === "status") {
-                // Show status message
-                setCurrentStatus(jsonData);
-                setMessages(prev => prev.map(msg => 
-                  msg.id === streamingId 
-                    ? { ...msg, text: `Processing: ${jsonData.message || 'Analyzing your request...'}` }
-                    : msg
-                ));
-              } else if (jsonData.type === "final_response") {
-                // This is the complete final response - start with this content
-                accumulatedAnswer = jsonData.content;
-                setStreamingAiResponseText(accumulatedAnswer);
-                
-                // Update the streaming message with the final response
-                setMessages(prev => prev.map(msg => 
-                  msg.id === streamingId 
-                    ? { ...msg, text: accumulatedAnswer }
-                    : msg
-                ));
-              } else if (jsonData.type === "response_chunk") {
-                // This is a streaming chunk - append to existing content
-                accumulatedAnswer += jsonData.content;
-                setStreamingAiResponseText(accumulatedAnswer);
-                
-                // Update the streaming message with accumulated text
-                setMessages(prev => prev.map(msg => 
-                  msg.id === streamingId 
-                    ? { ...msg, text: accumulatedAnswer }
-                    : msg
-                ));
               } else if (jsonData.type === "error") {
                 // Handle error
+                setCurrentStatus(null);
                 setMessages(prev => prev.map(msg => 
                   msg.id === streamingId 
                     ? { ...msg, text: `Error: ${jsonData.message}`, isError: true, isStreaming: false }
@@ -346,6 +347,7 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
         <MessageWindow
           messages={messages}
           isLoadingMessages={isLoadingMessages}
+          currentStatus={currentStatus}
         />
       </div>
 
