@@ -62,7 +62,7 @@ const SystemPromptModal = ({
           <div className="flex items-center space-x-2">
             <Settings className="w-5 h-5 text-white" />
             <h2 className="text-xl font-semibold text-white">
-              System Prompt Settings
+              Configuración del Prompt del Sistema
             </h2>
           </div>
           <button
@@ -81,26 +81,26 @@ const SystemPromptModal = ({
               htmlFor="systemPrompt"
               className="block text-sm font-medium text-white mb-2"
             >
-              Global System Prompt
+              Prompt Global del Sistema
             </label>
             {fetchLoading ? (
               <div className="w-full h-64 bg-gray-100 rounded-md flex items-center justify-center">
-                <div className="text-gray-400">Loading current prompt...</div>
+                <div className="text-gray-400">Cargando prompt actual...</div>
               </div>
             ) : (
               <textarea
                 id="systemPrompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter your system prompt here..."
+                placeholder="Ingresa tu prompt del sistema aquí..."
                 className="w-full h-64 px-3 py-2 bg-white border border-gray-300 rounded-md text-black placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                 disabled={isLoading}
                 required
               />
             )}
             <p className="mt-2 text-sm text-gray-400">
-              This prompt will be used as the system context for all
-              conversations.
+              Este prompt se utilizará como contexto del sistema para todas
+              las conversaciones.
             </p>
           </div>
 
@@ -112,14 +112,14 @@ const SystemPromptModal = ({
               className="px-4 py-2 text-black bg-white rounded-md transition-colors"
               disabled={isLoading}
             >
-              Cancel
+              Cancelar
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-black !text-white rounded-md hover:bg-gray-800 disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               disabled={isLoading || fetchLoading || !prompt.trim()}
             >
-              {isLoading ? "Updating..." : "Save Changes"}
+              {isLoading ? "Actualizando..." : "Guardar Cambios"}
             </button>
           </div>
         </form>
