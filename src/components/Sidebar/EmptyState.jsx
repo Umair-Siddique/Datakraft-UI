@@ -8,7 +8,7 @@ const EmptyState = ({ type, onRefresh }) => {
         style={{ color: "#E0E0E0" }}
       >
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-4"></div>
-        <p className="text-center">Loading chats...</p>
+        <p className="text-center">Cargando chats...</p>
       </div>
     );
   }
@@ -24,9 +24,9 @@ const EmptyState = ({ type, onRefresh }) => {
             className="mb-4 chat-icon"
           style={{ color: "#1F1F1F" }}
         />
-        <p className="text-center text-lg font-medium mb-2">No chats yet</p>
+        <p className="text-center text-lg font-medium mb-2">Aún no hay chats</p>
         <p className="text-center text-sm mb-4">
-          Click "New Chat" to start your first conversation
+          Haz clic en "Nuevo Chat" para comenzar tu primera conversación
         </p>
         <button
           onClick={onRefresh}
@@ -42,7 +42,7 @@ const EmptyState = ({ type, onRefresh }) => {
             e.target.style.backgroundColor = "#1F1F1F";
           }}
         >
-          Refresh
+          Actualizar
         </button>
       </div>
     );
@@ -55,8 +55,8 @@ const EmptyState = ({ type, onRefresh }) => {
         style={{ color: "#E0E0E0" }}
       >
         <Search size={32} className="mb-2" style={{ color: "#1F1F1F" }} />
-        <p className="text-center">No chats match your search</p>
-        <p className="text-center text-sm mt-1">Try a different search term</p>
+        <p className="text-center">No hay chats que coincidan con tu búsqueda</p>
+        <p className="text-center text-sm mt-1">Prueba con un término de búsqueda diferente</p>
       </div>
     );
   }

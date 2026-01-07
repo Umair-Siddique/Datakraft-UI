@@ -36,7 +36,7 @@ const NewChatModal = ({ show, onClose, onConfirm, isLoading }) => {
           className="text-lg font-semibold mb-4"
           style={{ color: '#E0E0E0' }}
         >
-          Create New Chat
+          Crear Nuevo Chat
         </h2>
         
         <div className="mb-4">
@@ -45,7 +45,7 @@ const NewChatModal = ({ show, onClose, onConfirm, isLoading }) => {
             className="block text-sm font-medium mb-2"
             style={{ color: '#E0E0E0' }}
           >
-            Chat Name
+            Nombre del Chat
           </label>
           <input
             id="chatName"
@@ -53,7 +53,7 @@ const NewChatModal = ({ show, onClose, onConfirm, isLoading }) => {
             value={chatName}
             onChange={(e) => setChatName(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Enter chat name..."
+            placeholder="Ingresa el nombre del chat..."
             className="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 disabled:opacity-50"
             style={{
               backgroundColor: '#1F1F1F',
@@ -81,7 +81,7 @@ const NewChatModal = ({ show, onClose, onConfirm, isLoading }) => {
             onFocus={() => setIsHovered(false)}
             onBlur={() => setIsHovered(false)}
           >
-            Cancel
+            Cancelar
           </button>
           <button
             type="submit"
@@ -94,7 +94,7 @@ const NewChatModal = ({ show, onClose, onConfirm, isLoading }) => {
               border: '1px solid #1E1E1E'
             }}
           >
-            {isLoading ? "Creating..." : "Create Chat"}
+            {isLoading ? "Creando..." : "Crear Chat"}
           </button>
         </div>
       </div>

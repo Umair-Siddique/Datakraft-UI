@@ -60,7 +60,7 @@ const ChatHeader = ({
             />
           </svg>
           <span className="text-white hidden sm:inline">
-            {currentModel?.name || "Select Model"}
+            {currentModel?.name || "Seleccionar Modelo"}
           </span>
           <svg
             className={`w-4 h-4 transition-transform duration-200 ${
@@ -95,7 +95,7 @@ const ChatHeader = ({
                 className="text-xs font-medium uppercase tracking-wide mb-2 px-2"
                 style={{ color: "#E0E0E0" }}
               >
-                Select AI Model
+                Seleccionar Modelo de IA
               </div>
               {availableModels?.map((model) => (
                 <button
@@ -140,7 +140,7 @@ const ChatHeader = ({
                         />
                       </svg>
                       <span className="text-xs" style={{ color: "#00C2A8" }}>
-                        Currently selected
+                        Actualmente seleccionado
                       </span>
                     </div>
                   )}

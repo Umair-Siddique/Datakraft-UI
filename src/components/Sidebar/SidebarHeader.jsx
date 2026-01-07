@@ -22,7 +22,7 @@ const SidebarHeader = ({ onNewChatClick, isCreatingChat }) => {
         // }}
       >
         <Plus size={18} className="text-white" />
-        <span>{isCreatingChat ? "Creating..." : "New Chat"}</span>
+        <span>{isCreatingChat ? "Creando..." : "Nuevo Chat"}</span>
       </button>
     </div>
   );

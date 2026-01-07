@@ -32,13 +32,13 @@ export default function SigninPage() {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = "El correo electrónico es requerido";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = "El correo electrónico no es válido";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = "La contraseña es requerida";
     }
 
     setErrors(newErrors);
@@ -73,7 +73,7 @@ export default function SigninPage() {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        general: error.message || "Login failed",
+        general: error.message || "Error al iniciar sesión",
       }));
     }
   };
@@ -83,7 +83,7 @@ export default function SigninPage() {
   };
 
   return (
-    <AuthLayout title="Welcome back!">
+    <AuthLayout title="¡Bienvenido de nuevo!">
       <ErrorMessage message={errors.general} />
 
       <div className="mt-6 space-y-6">
@@ -91,8 +91,8 @@ export default function SigninPage() {
           id="email"
           name="email"
           type="email"
-          label="Email address"
-          placeholder="you@example.com"
+          label="Correo electrónico"
+          placeholder="tu@ejemplo.com"
           value={formData.email}
           onChange={handleChange}
           error={errors.email}
@@ -103,7 +103,7 @@ export default function SigninPage() {
           id="password"
           name="password"
           type="password"
-          label="Password"
+          label="Contraseña"
           placeholder="••••••••"
           value={formData.password}
           onChange={handleChange}
@@ -113,14 +113,14 @@ export default function SigninPage() {
 
         <div className="pt-2">
           <Button onClick={handleSubmit} loading={loading}>
-            Sign in
+            Iniciar sesión
           </Button>
         </div>
       </div>
 
       <div className="mt-8 text-center">
         <p className="text-sm" style={{ color: "#E0E0E0" }}>
-          Don't have an account?{" "}
+          ¿No tienes una cuenta?{" "}
           <button
             onClick={navigateToSignup}
             className="font-medium transition-colors duration-200"
@@ -130,7 +130,7 @@ export default function SigninPage() {
             onMouseEnter={(e) => (e.target.style.color = "#1E1E1E")}
             onMouseLeave={(e) => (e.target.style.color = "#1E1E1E")}
           >
-            Create account
+            Crear cuenta
           </button>
         </p>
       </div>

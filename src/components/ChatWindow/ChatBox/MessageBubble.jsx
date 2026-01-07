@@ -10,7 +10,7 @@ const MessageBubble = ({ msg, isUser, isFirstAIResponse }) => {
       // Try modern clipboard API first
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
-        toast.success("Message copied!", { duration: 1500 });
+        toast.success("¡Mensaje copiado!", { duration: 1500 });
         return;
       }
 
@@ -28,13 +28,13 @@ const MessageBubble = ({ msg, isUser, isFirstAIResponse }) => {
       document.body.removeChild(textArea);
 
       if (successful) {
-        toast.success("Message copied!", { duration: 1500 });
+        toast.success("¡Mensaje copiado!", { duration: 1500 });
       } else {
         throw new Error("Copy command failed");
       }
     } catch (error) {
       console.error("Copy failed:", error);
-      toast.error("Failed to copy message.");
+      toast.error("Error al copiar el mensaje.");
     }
   };
 
@@ -96,7 +96,7 @@ const MessageBubble = ({ msg, isUser, isFirstAIResponse }) => {
                              transition-all duration-200 ease-out z-20
                              ${isUser ? "-left-12" : "-right-12"}`}
             onClick={() => handleCopyMessage(msg.text)}
-            title="Copy message"
+            title="Copiar mensaje"
           >
             <Copy size={16} />
           </button>

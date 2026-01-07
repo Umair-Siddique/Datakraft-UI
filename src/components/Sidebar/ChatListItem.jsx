@@ -129,7 +129,7 @@ const ChatListItem = ({ chatId, chat, title, activeId, onChatClick, onDeleteChat
               {chat.title}
             </p>
           )}
-          {chat.messages && chat.messages.length > 0 && !isEditing && (
+              {chat.messages && chat.messages.length > 0 && !isEditing && (
             <p
               className={`text-xs truncate mt-1 ${
                 activeId === chat.id || isHovered
@@ -137,7 +137,7 @@ const ChatListItem = ({ chatId, chat, title, activeId, onChatClick, onDeleteChat
                   : "text-gray-500"
               }`}
             >
-              {chat.messages[chat.messages.length - 1]?.text || "No messages"}
+              {chat.messages[chat.messages.length - 1]?.text || "Sin mensajes"}
             </p>
           )}
         </div>

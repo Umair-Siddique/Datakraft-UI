@@ -31,19 +31,19 @@ export default function SignupPage() {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = "El correo electrónico es requerido";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = "El correo electrónico no es válido";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = "La contraseña es requerida";
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
 
     setErrors(newErrors);
@@ -73,7 +73,7 @@ export default function SignupPage() {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        general: error.message || "Signup failed",
+        general: error.message || "Error al crear la cuenta",
       }));
     }
   };
@@ -83,7 +83,7 @@ export default function SignupPage() {
   };
 
   return (
-    <AuthLayout title="Create your account">
+    <AuthLayout title="Crea tu cuenta">
       <ErrorMessage message={errors.general} />
 
       <div className="mt-6 space-y-6">
@@ -91,8 +91,8 @@ export default function SignupPage() {
           id="email"
           name="email"
           type="email"
-          label="Email address"
-          placeholder="you@example.com"
+          label="Correo electrónico"
+          placeholder="tu@ejemplo.com"
           value={formData.email}
           onChange={handleChange}
           error={errors.email}
@@ -103,7 +103,7 @@ export default function SignupPage() {
           id="password"
           name="password"
           type="password"
-          label="Password"
+          label="Contraseña"
           placeholder="••••••••"
           value={formData.password}
           onChange={handleChange}
@@ -115,7 +115,7 @@ export default function SignupPage() {
           id="confirmPassword"
           name="confirmPassword"
           type="password"
-          label="Confirm password"
+          label="Confirmar contraseña"
           placeholder="••••••••"
           value={formData.confirmPassword}
           onChange={handleChange}
@@ -125,14 +125,14 @@ export default function SignupPage() {
 
         <div className="pt-2">
           <Button onClick={handleSubmit} loading={loading}>
-            Create account
+            Crear cuenta
           </Button>
         </div>
       </div>
 
       <div className="mt-8 text-center">
         <p className="text-sm" style={{ color: "#E0E0E0" }}>
-          Already have an account?{" "}
+          ¿Ya tienes una cuenta?{" "}
           <button
             onClick={navigateToSignin}
             className="font-medium transition-colors duration-200"
@@ -142,7 +142,7 @@ export default function SignupPage() {
             onMouseEnter={(e) => (e.target.style.color = "#1E1E1E")}
             onMouseLeave={(e) => (e.target.style.color = "#1E1E1E")}
           >
-            Sign in
+            Iniciar sesión
           </button>
         </p>
       </div>

@@ -15,7 +15,7 @@ const SearchBar = ({ searchTerm, onSearchChange, onClearSearch }) => {
         />
         <input
           type="text"
-          placeholder="Search chats..."
+          placeholder="Buscar chats..."
           value={searchTerm}
           onChange={handleInputChange}
           className="w-full pl-10 pr-10 py-2 rounded-md search-bar-input focus:outline-none focus:ring-2"

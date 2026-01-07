@@ -82,7 +82,7 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
       setMessages(transformedMessages);
     } catch (error) {
       console.error("Error fetching messages:", error);
-      toast.error(`Failed to load messages: ${error.message}`);
+      toast.error(`Error al cargar mensajes: ${error.message}`);
       setMessages([]);
     } finally {
       setIsLoadingMessages(false);
@@ -292,11 +292,11 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
             timestamp: new Date().toISOString(),
           },
         ]);
-        toast.error(`Failed to send message: ${apiResponse.error}`);
+        toast.error(`Error al enviar mensaje: ${apiResponse.error}`);
       }
     } catch (error) {
       console.error("Critical error in handleSendClick:", error);
-      toast.error(`A critical error occurred: ${error.message}`);
+      toast.error(`Ocurrió un error crítico: ${error.message}`);
     } finally {
       setIsSendingMessage(false);
       setStreamingAiResponseText("");
@@ -321,7 +321,7 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
     setShowModelSelector(false);
 
     const selectedModelInfo = AI_MODELS.find((model) => model.id === modelId);
-    toast.success(`Switched to ${selectedModelInfo.name}`, {
+    toast.success(`Cambiado a ${selectedModelInfo.name}`, {
       duration: 2000,
     });
   };

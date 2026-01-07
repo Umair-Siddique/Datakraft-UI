@@ -43,15 +43,15 @@ export const useChatManagement = () => {
 
         let timeLabel;
         if (diffInDays === 0) {
-          timeLabel = "Today";
+          timeLabel = "Hoy";
         } else if (diffInDays === 1) {
-          timeLabel = "Yesterday";
+          timeLabel = "Ayer";
         } else if (diffInDays <= 7) {
-          timeLabel = "This Week";
+          timeLabel = "Esta Semana";
         } else if (diffInDays <= 30) {
-          timeLabel = "This Month";
+          timeLabel = "Este Mes";
         } else {
-          timeLabel = "Older";
+          timeLabel = "Más Antiguos";
         }
 
         return {
@@ -119,7 +119,7 @@ export const useChatManagement = () => {
       await fetchChats();
     } catch (error) {
       console.error("Error creating new chat:", error);
-      alert(`Failed to create chat: ${error.message}`);
+      alert(`Error al crear el chat: ${error.message}`);
     } finally {
       setIsCreatingChat(false);
     }

@@ -85,7 +85,7 @@ const ChatPage = () => {
         // User needs to select a chat to start
       } catch (error) {
         console.error("Failed to initialize data:", error);
-        toast.error("Failed to load chat history");
+        toast.error("Error al cargar el historial de chats");
       }
     };
 
@@ -210,7 +210,7 @@ const ChatPage = () => {
         
         if (!accessToken) {
           console.error("❌ No access token found!");
-          toast.error("Authentication required");
+          toast.error("Autenticación requerida");
           return;
         }
 
@@ -243,7 +243,7 @@ const ChatPage = () => {
             }
 
             if (chatToDelete) {
-              toast.success(`"${chatToDelete.title}" deleted successfully`, {
+              toast.success(`"${chatToDelete.title}" eliminado exitosamente`, {
                 duration: 2000,
               });
             }
@@ -254,11 +254,11 @@ const ChatPage = () => {
           console.error("❌ Delete failed with status:", response.status);
           const errorData = await response.json().catch(() => ({}));
           console.error("❌ Error data:", errorData);
-          toast.error(errorData.message || "Failed to delete chat");
+          toast.error(errorData.message || "Error al eliminar el chat");
         }
       } catch (error) {
         console.error('Error deleting chat:', error);
-        toast.error("Failed to delete chat");
+        toast.error("Error al eliminar el chat");
       }
     },
     [activeId]

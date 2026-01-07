@@ -21,7 +21,7 @@ const InputArea = ({
               borderColor: "#E0E0E0",
               boxShadow: "0 1px 4px 0 #E0E0E0",
             }}
-            placeholder="Type your message..."
+            placeholder="Escribe tu mensaje..."
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}

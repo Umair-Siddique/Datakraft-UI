@@ -54,7 +54,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
 
   // Event handlers
   const handleNewChatClick = async () => {
-    await createNewChat("New Chat", onNewChat);
+    await createNewChat("Nuevo Chat", onNewChat);
   };
 
   const handleUploadClick = () => {
@@ -81,7 +81,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
     const chatName = chatToDelete ? chatToDelete.title : "chat";
 
     setDeleteLoading(true);
-    const loadingToastId = toast.loading(`Deleting "${chatName}"...`);
+    const loadingToastId = toast.loading(`Eliminando "${chatName}"...`);
 
     try {
       console.log("🗑️ Deleting chat with ID:", chatToDeleteId);
@@ -94,7 +94,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
         console.log("✅ onDeleteChat completed");
       } else {
         console.error("❌ onDeleteChat is not a function!");
-        toast.error("Failed to delete chat", { id: loadingToastId });
+        toast.error("Error al eliminar el chat", { id: loadingToastId });
       }
       
       console.log("🔄 Fetching chats...");
@@ -139,13 +139,13 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
       console.log("🌐 API_URL:", API_URL);
 
       if (!access_token) {
-        toast.error("Authentication required");
+        toast.error("Autenticación requerida");
         setShowUploadModal(false);
         return;
       }
 
       setUploadLoading(true);
-      loadingToastId = toast.loading(`Uploading "${file.name}" as ${documentType}...`);
+      loadingToastId = toast.loading(`Subiendo "${file.name}" como ${documentType}...`);
 
       // Prepare form data with correct field names
       const formData = new FormData();
@@ -218,11 +218,11 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
       // Show error toast
       const errorMsg = error.message || "Unknown error occurred";
       if (loadingToastId) {
-        toast.error(`Failed to upload "${file.name}": ${errorMsg}`, {
+        toast.error(`Error al subir "${file.name}": ${errorMsg}`, {
           id: loadingToastId,
         });
       } else {
-        toast.error(`Failed to upload "${file.name}": ${errorMsg}`);
+        toast.error(`Error al subir "${file.name}": ${errorMsg}`);
       }
     } finally {
       console.log("🏁 Upload process finished, clearing loading state");
@@ -257,7 +257,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
       return data.system_prompt || "";
     } catch (error) {
       console.error("Fetch system prompt error:", error);
-      toast.error(`Failed to fetch system prompt: ${error.message}`);
+      toast.error(`Error al obtener el prompt del sistema: ${error.message}`);
       return null;
     }
   };
@@ -278,7 +278,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
     }
 
     setSystemPromptLoading(true);
-    const loadingToastId = toast.loading("Updating system prompt...");
+    const loadingToastId = toast.loading("Actualizando prompt del sistema...");
 
     // Add timeout controller
     const controller = new AbortController();
@@ -337,7 +337,7 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
       }
 
       console.log("✅ Success data:", data);
-      toast.success(data.message || "System prompt updated successfully!", {
+      toast.success(data.message || "¡Prompt del sistema actualizado exitosamente!", {
         id: loadingToastId,
       });
 
@@ -349,14 +349,14 @@ const Sidebar = ({ activeId, onSelectChat, onNewChat, onDeleteChat }) => {
       
       if (error.name === 'AbortError') {
         console.error("⏰ Request timed out");
-        toast.error("Request timed out. Please try again.", {
+        toast.error("La solicitud expiró. Por favor intenta de nuevo.", {
           id: loadingToastId,
         });
       } else {
         console.error("❌ Update system prompt error:", error);
         console.error("Error stack:", error.stack);
         
-        toast.error(`Failed to update system prompt: ${error.message}`, {
+        toast.error(`Error al actualizar el prompt del sistema: ${error.message}`, {
           id: loadingToastId,
         });
       }
