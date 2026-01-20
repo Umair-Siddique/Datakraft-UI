@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
-import SignupPage from "./pages/Signup";
 import SigninPage from "./pages/Signin";
 import ChatPage from "./pages/ChatPage";
 
@@ -24,8 +23,6 @@ const App = () => {
           <Route element={<PublicRoute />}>
             {/* <Route path="/" element={<h1>Landing Page</h1>} /> */}
             <Route path="/Signin" element={<SigninPage />} />
-            <Route path="/Signup" element={<SignupPage />} />
-            
             
             {/* <Route
               path="/forgot-password"

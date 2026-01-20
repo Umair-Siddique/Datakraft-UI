@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { useAxios, useAuth } from "../hooks";
 import AuthLayout from "../layouts/AuthLayout";
@@ -16,8 +15,6 @@ export default function SigninPage() {
   const [errors, setErrors] = useState({});
   const { request, loading } = useAxios();
   const { login } = useAuth();
-
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -78,10 +75,6 @@ export default function SigninPage() {
     }
   };
 
-  const navigateToSignup = () => {
-    navigate("/signup");
-  };
-
   return (
     <AuthLayout title="¡Bienvenido de nuevo!">
       <ErrorMessage message={errors.general} />
@@ -116,23 +109,6 @@ export default function SigninPage() {
             Iniciar sesión
           </Button>
         </div>
-      </div>
-
-      <div className="mt-8 text-center">
-        <p className="text-sm" style={{ color: "#E0E0E0" }}>
-          ¿No tienes una cuenta?{" "}
-          <button
-            onClick={navigateToSignup}
-            className="font-medium transition-colors duration-200"
-            style={{
-              color: "#1E1E1E",
-            }}
-            onMouseEnter={(e) => (e.target.style.color = "#1E1E1E")}
-            onMouseLeave={(e) => (e.target.style.color = "#1E1E1E")}
-          >
-            Crear cuenta
-          </button>
-        </p>
       </div>
     </AuthLayout>
   );
