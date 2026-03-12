@@ -10,10 +10,10 @@ const MessageWindow = ({ messages, isLoadingMessages, currentStatus }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom when messages or status change
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, currentStatus]);
 
   // Auto-scroll when loading state changes (when messages are first loaded)
   useEffect(() => {

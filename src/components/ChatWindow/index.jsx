@@ -39,6 +39,9 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
   const [streamingAiResponseText, setStreamingAiResponseText] = useState("");
   const [currentStatus, setCurrentStatus] = useState(null);
   const [streamingMessageId, setStreamingMessageId] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  // Namespace selection for retriever API; "all" means use all collections
+  const [selectedNamespace, setSelectedNamespace] = useState("all");
 
   // Function to fetch messages for a specific chat
   const fetchChatMessages = async (chatId) => {
@@ -106,7 +109,7 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
     }));
   };
 
-  const sendRetrievalQuery = async (query) => {
+  const sendRetrievalQuery = async (query, file = null) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       const access_token = user?.access_token;
@@ -115,20 +118,45 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
         throw new Error("Access token not found. Please log in again.");
       }
 
-      // Updated request payload to match your exact API specification
-      const requestPayload = {
-        query: query.trim(),
-        conversation_id: activeId || uuidv4(),
-      };
+      const conversationId = activeId || uuidv4();
+      const trimmedQuery = query.trim();
 
-      const response = await fetch(`${API_URL}/retriever/query`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${access_token}`,
-        },
-        body: JSON.stringify(requestPayload),
-      });
+      let response;
+
+      if (file) {
+        // When a file is attached, use multipart/form-data
+        const formData = new FormData();
+        formData.append("conversation_id", conversationId);
+        formData.append("query", trimmedQuery);
+        formData.append("file", file);
+        // Pass selected namespace (backend accepts multiple "namespaces" fields)
+        formData.append("namespaces", selectedNamespace || "all");
+
+        response = await fetch(`${API_URL}/retriever/query`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+          body: formData,
+        });
+      } else {
+        // Fallback to JSON request when no file is attached
+        const requestPayload = {
+          query: trimmedQuery,
+          conversation_id: conversationId,
+          // Backend expects an array of namespace keys
+          namespaces: [selectedNamespace || "all"],
+        };
+
+        response = await fetch(`${API_URL}/retriever/query`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${access_token}`,
+          },
+          body: JSON.stringify(requestPayload),
+        });
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -180,35 +208,33 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
                 setCurrentStatus(jsonData.message);
               } else if (jsonData.type === "content") {
                 // Clear status when content starts streaming
-                if (currentStatus) {
-                  setCurrentStatus(null);
-                }
+                setCurrentStatus(null);
                 
-                // Append content chunk to accumulated answer
-                accumulatedAnswer += jsonData.message;
+                // Append content chunk to accumulated answer (backend may send full or incremental)
+                const textChunk = jsonData.message ?? "";
+                accumulatedAnswer += textChunk;
                 setStreamingAiResponseText(accumulatedAnswer);
                 
                 // Create or update the streaming message
                 setMessages(prev => {
                   const existingMessage = prev.find(msg => msg.id === streamingId);
                   if (existingMessage) {
-                    // Update existing message
                     return prev.map(msg => 
                       msg.id === streamingId 
                         ? { ...msg, text: accumulatedAnswer, isStreaming: true }
                         : msg
                     );
-                  } else {
-                    // Create new message
-                    return [...prev, {
-                      from: "ai",
-                      text: accumulatedAnswer,
-                      id: streamingId,
-                      timestamp: new Date().toISOString(),
-                      isStreaming: true,
-                    }];
                   }
+                  return [...prev, {
+                    from: "ai",
+                    text: accumulatedAnswer,
+                    id: streamingId,
+                    timestamp: new Date().toISOString(),
+                    isStreaming: true,
+                  }];
                 });
+                // Yield so React can render incrementally (prevents batching from hiding streaming)
+                await new Promise(resolve => setTimeout(resolve, 0));
               } else if (jsonData.type === "done") {
                 // Mark streaming as complete
                 console.log("Stream complete");
@@ -219,13 +245,27 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
                     : msg
                 ));
               } else if (jsonData.type === "error") {
-                // Handle error
+                // Handle error - create message if none exists yet
                 setCurrentStatus(null);
-                setMessages(prev => prev.map(msg => 
-                  msg.id === streamingId 
-                    ? { ...msg, text: `Error: ${jsonData.message}`, isError: true, isStreaming: false }
-                    : msg
-                ));
+                const errorText = jsonData.message ?? "Unknown error";
+                setMessages(prev => {
+                  const existing = prev.find(msg => msg.id === streamingId);
+                  if (existing) {
+                    return prev.map(msg =>
+                      msg.id === streamingId
+                        ? { ...msg, text: `Error: ${errorText}`, isError: true, isStreaming: false }
+                        : msg
+                    );
+                  }
+                  return [...prev, {
+                    from: "ai",
+                    text: `Error: ${errorText}`,
+                    id: streamingId,
+                    timestamp: new Date().toISOString(),
+                    isError: true,
+                    isStreaming: false,
+                  }];
+                });
               }
             } catch (parseError) {
               console.error("Error parsing SSE data:", parseError, "Line:", trimmedLine);
@@ -276,7 +316,7 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
       setMessages((prev) => [...prev, userMessageObj]);
       setInput("");
 
-      const apiResponse = await sendRetrievalQuery(userMessage);
+      const apiResponse = await sendRetrievalQuery(userMessage, selectedFile);
 
       // Note: The streaming message is already handled in sendRetrievalQuery
       // We don't need to add another message here for success case
@@ -302,6 +342,7 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
       setStreamingAiResponseText("");
       setCurrentStatus(null);
       setStreamingMessageId(null);
+      setSelectedFile(null);
     }
   };
 
@@ -328,19 +369,49 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
 
   const currentModel = AI_MODELS.find((model) => model.id === selectedModel);
 
+  const handleFileChange = (event) => {
+    const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+    setSelectedFile(file);
+  };
+
   return (
     <div
       className="flex flex-col h-screen relative chatwindow-custom"
       style={{ background: "#fff" }}
     >
-      <div className="flex-shrink-0">
-        <ChatHeader
-          currentModel={currentModel}
-          showModelSelector={showModelSelector}
-          setShowModelSelector={setShowModelSelector}
-          onModelChange={handleModelChange}
-          availableModels={AI_MODELS}
-        />
+      <div className="flex-shrink-0 border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          {/* Top-left namespace selector */}
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-500 font-medium">
+              Colección
+            </span>
+            <select
+              className="mt-1 text-xs border rounded-md px-2 py-1 bg-white text-gray-800"
+              value={selectedNamespace}
+              onChange={(e) => setSelectedNamespace(e.target.value)}
+            >
+              <option value="all">Todas las colecciones</option>
+              <option value="informe_anual">Informe Anual</option>
+              <option value="libro">Libros Técnicos</option>
+              <option value="boletines">Boletines Técnicos</option>
+              <option value="manuales">Manuales Técnicos</option>
+              <option value="revistas_cientificas">Revistas Científicas</option>
+              <option value="memorias">Memorias de Resultados</option>
+            </select>
+          </div>
+
+          {/* Existing chat header (model selector, title, etc.) */}
+          <div className="flex-1 ml-4">
+            <ChatHeader
+              currentModel={currentModel}
+              showModelSelector={showModelSelector}
+              setShowModelSelector={setShowModelSelector}
+              onModelChange={handleModelChange}
+              availableModels={AI_MODELS}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 min-h-0">
@@ -358,6 +429,10 @@ const ChatWindow = ({ activeId, shouldFetchMessages = false }) => {
           handleKeyDown={handleKeyDown}
           handleSendClick={handleSendClick}
           disabled={isSendingMessage || isLoadingMessages}
+          selectedFile={selectedFile}
+          handleFileChange={handleFileChange}
+          selectedNamespace={selectedNamespace}
+          onNamespaceChange={setSelectedNamespace}
         />
       </div>
 

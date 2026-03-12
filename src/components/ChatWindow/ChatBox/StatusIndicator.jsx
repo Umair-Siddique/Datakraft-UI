@@ -4,8 +4,8 @@ const StatusIndicator = ({ status }) => {
   if (!status) return null;
 
   return (
-    <div className="flex items-center justify-start mb-4 animate-fade-in">
-      <div className="flex-shrink-0 mr-3 md:mr-4">
+    <div className="flex items-start justify-start mb-4 animate-fade-in">
+      <div className="flex-shrink-0 mt-1 mr-3 md:mr-4">
         {/* Animated ripple effect */}
         <div className="relative w-10 h-10 flex items-center justify-center">
           {/* Outer ripple */}

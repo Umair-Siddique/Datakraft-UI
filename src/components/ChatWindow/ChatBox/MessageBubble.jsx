@@ -2,7 +2,38 @@ import React from "react";
 import { Copy } from "lucide-react";
 import toast from "react-hot-toast";
 import Markdown from "react-markdown";
-import remarkGfm from 'remark-gfm'; // <-- ADD THIS IMPORT
+import remarkGfm from "remark-gfm";
+
+// Compact markdown components — minimal spacing for AI responses
+const compactMarkdownComponents = {
+  p: ({ children, ...props }) => (
+    <p className="mb-0.5 last:mb-0 leading-tight" {...props}>{children}</p>
+  ),
+  ul: ({ children, ...props }) => (
+    <ul className="list-disc pl-5 my-0.5 space-y-0 last:mb-0" {...props}>{children}</ul>
+  ),
+  ol: ({ children, ...props }) => (
+    <ol className="list-decimal pl-5 my-0.5 space-y-0 last:mb-0" {...props}>{children}</ol>
+  ),
+  li: ({ children, ...props }) => (
+    <li className="leading-tight py-0" {...props}>{children}</li>
+  ),
+  hr: ({ ...props }) => (
+    <hr className="my-1 border-gray-200" {...props} />
+  ),
+  h1: ({ children, ...props }) => (
+    <h1 className="text-lg font-semibold mt-1 mb-0.5 first:mt-0 leading-tight" {...props}>{children}</h1>
+  ),
+  h2: ({ children, ...props }) => (
+    <h2 className="text-base font-semibold mt-1 mb-0.5 first:mt-0 leading-tight" {...props}>{children}</h2>
+  ),
+  h3: ({ children, ...props }) => (
+    <h3 className="text-sm font-semibold mt-0.5 mb-0 first:mt-0 leading-tight" {...props}>{children}</h3>
+  ),
+  blockquote: ({ children, ...props }) => (
+    <blockquote className="border-l-2 border-gray-300 pl-3 my-0.5 text-gray-600 leading-tight" {...props}>{children}</blockquote>
+  ),
+};
 
 const MessageBubble = ({ msg, isUser, isFirstAIResponse }) => {
   const handleCopyMessage = async (text) => {
@@ -51,17 +82,21 @@ const MessageBubble = ({ msg, isUser, isFirstAIResponse }) => {
   return (
     <div className="relative group/message">
       <div
-        className={`relative px-4 py-3 md:px-6 md:py-4 rounded-2xl shadow-sm text-sm md:text-base leading-relaxed transition-all duration-200 hover:shadow-md
+        className={`relative px-4 py-3 md:px-6 md:py-4 rounded-2xl shadow-sm text-sm md:text-base leading-snug transition-all duration-200 hover:shadow-md
           ${getMessageStyles(msg.from, msg.isError)}
           ${isUser ? "rounded-br-md" : "rounded-bl-md"}`}
       >
         <div
-          className={`whitespace-pre-wrap ${
-            isFirstAIResponse ? "font-medium" : ""
-          }`}
+          className={`whitespace-pre-wrap [&_.message-content>div>*]:mt-0 [&_.message-content>div>*]:mb-0.5 [&_.message-content>div>*]:last:mb-0 ${isFirstAIResponse ? "font-medium" : ""}`}
         >
-          {/* MODIFY THIS LINE: Add the remarkPlugins prop */}
-          <Markdown remarkPlugins={[remarkGfm]}>{msg.text}</Markdown>
+          <div className="message-content">
+            <Markdown
+              remarkPlugins={[remarkGfm]}
+              components={compactMarkdownComponents}
+            >
+              {msg.text}
+            </Markdown>
+          </div>
           
           {/* Streaming cursor indicator */}
           {msg.isStreaming && !isUser && (
